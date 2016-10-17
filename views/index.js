@@ -77,13 +77,13 @@ module.exports = `<html lang="en">
             <div class="row">
               <div class="col-xs-12">
               	<div class="widget-title title-with-nav-bars">
-              		<ul class="nav nav-tabs">
-              			<li class="active"><a data-toggle="tab" href="#request"><span class="tab-title">Request</span></a></li>
-              			<li class=""><a data-toggle="tab" href="#login"><span class="tab-title">Login</span></a></li>
+              		<ul id="tabs" class="nav nav-tabs">
+              			<li class="active"><a data-toggle="tab" href="#login"><span class="tab-title">Login</span></a></li>
+                		<li><a data-toggle="tab" href="#request"><span class="tab-title">Request</span></a></li>
               		</ul>
               	</div>
               	<div id="content-area" class="tab-content">
-                  <div id="login" class="tab-pane">
+                  <div id="login" class="tab-pane active">
                     <div class="row">
                       <div class="col-xs-12">
                         <h4>Login Using</h4>
@@ -128,6 +128,13 @@ module.exports = `<html lang="en">
                             <div class="form-group"><label class="col-xs-2 control-label">State</label>
                               <div class="col-xs-10">
                                 <input id="state" type="text" class="form-control" value="">
+                                <p class="controls-info">This might translate to RelayState or wctx depending on the protocol.</p>
+                              </div>
+                            </div>
+                            <div class="form-group"><label class="col-xs-2 control-label">Connection</label>
+                              <div class="col-xs-10">
+                                <input id="connection" type="text" class="form-control" value="">
+                                <p class="controls-info">Sprecify the name of a connection to skip the login page (eg: <strong>google-oauth2</strong>).</p>
                               </div>
                             </div>
                           </form>
@@ -178,7 +185,7 @@ module.exports = `<html lang="en">
                       </div>
                     </div>
                   </div>
-              		<div id="request" class="tab-pane active">
+              		<div id="request" class="tab-pane">
                     <div class="row">
                       <div class="col-xs-12">
                         <div>
@@ -299,6 +306,7 @@ module.exports = `<html lang="en">
   <script type="text/javascript">
   function read() {
     $('#domain').val(localStorage.getItem('domain') || 'sandrino.auth0.com');
+    $('#connection').val(localStorage.getItem('connection'));
     $('#client_id').val(localStorage.getItem('client_id') || 'IsTxQ7jAYAXL5r5HM4L1RMzsSG0UHeOy');
     $('#audience').val(localStorage.getItem('audience'));
     $('#scope').val(localStorage.getItem('scope') || 'openid name email nickname');
@@ -313,6 +321,7 @@ module.exports = `<html lang="en">
 
   function save() {
     localStorage.setItem('domain', $('#domain').val());
+    localStorage.setItem('connection', $('#connection').val());
     localStorage.setItem('client_id', $('#client_id').val());
     localStorage.setItem('audience', $('#audience').val());
     localStorage.setItem('scope', $('#scope').val());
@@ -333,6 +342,10 @@ module.exports = `<html lang="en">
   $(function () {
     read();
 
+    if ("{{method}}" === 'POST' || (window.location.hash && window.location.hash.length > 1) || (window.location.query && window.location.query.length > 1)) {
+      $('#tabs a[href="#request"]').tab('show');
+    }
+
     if (window.location.hash && window.location.hash.length > 1) {
       $('#hash_fragment').load(window.location.origin + window.location.pathname + '/hash?' + window.location.hash.replace(/^\#/,""));
     }
@@ -341,14 +354,26 @@ module.exports = `<html lang="en">
       e.preventDefault();
       save();
 
-      window.location.href = 'https://' + $('#domain').val() + '/samlp/' + $('#client_id').val() + '?RelayState=' + encodeURIComponent($('#state').val());
+      var url = 'https://' + $('#domain').val() + '/samlp/' + $('#client_id').val() + '?RelayState=' + encodeURIComponent($('#state').val());
+
+      if ($('#connection').val() && $('#connection').val().length) {
+        url = url + '&connection=' + encodeURIComponent($('#connection').val());
+      }
+
+      window.location.href = url;
     });
 
     $('#wsfed').click(function(e) {
       e.preventDefault();
       save();
 
-      window.location.href = 'https://' + $('#domain').val() + '/wsfed/' + $('#client_id').val() + '?wctx=' + encodeURIComponent($('#state').val());
+      var url = 'https://' + $('#domain').val() + '/wsfed/' + $('#client_id').val() + '?wctx=' + encodeURIComponent($('#state').val());
+
+      if ($('#connection').val() && $('#connection').val().length) {
+        url = url + '&wtrealm=' + encodeURIComponent($('#connection').val());
+      }
+
+      window.location.href = url;
     });
 
     $('#oidc_oauth2').click(function(e) {
@@ -368,6 +393,10 @@ module.exports = `<html lang="en">
 
       if ($('#scope').val() && $('#scope').val().length) {
         options.scope = $('#scope').val();
+      }
+
+      if ($('#connection').val() && $('#connection').val().length) {
+        options.connection = $('#connection').val();
       }
 
       if ($('#use_audience').is(':checked') && $('#audience').val() && $('#audience').val().length) {
