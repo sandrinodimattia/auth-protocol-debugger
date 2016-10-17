@@ -89,9 +89,9 @@ module.exports = `<html lang="en">
                       <h4>Login Using</h4>
                       <button id="saml" class="btn btn-primary">SAML</button>
                       <button id="wsfed" class="btn btn-primary">WS-Federation</button>
+                      <button id="oidc_oauth2" class="btn btn-primary">OAuth2 / OIDC User Flow</button>
                       <br />
                       <br />
-                      <button id="oidc_oauth2" class="btn btn-primary">OIDC / OAuth2</button>
                       <button id="oauth2_client_credentials" class="btn btn-primary">OAuth2 Client Credentials</button>
                       <button id="oauth2_code_exchange" class="btn btn-primary">OAuth2 Code Exchange</button>
                       <button id="oauth2_refresh_token_exchange" class="btn btn-primary">OAuth2 Refresh Token Exchange</button>
@@ -191,26 +191,26 @@ module.exports = `<html lang="en">
                             <label class="col-xs-2 control-label">Response Type</label>
                             <div class="col-xs-10">
                               <input id="response_type" type="text" class="form-control" value="">
-                              <p class="controls-info">For OIDC/OAuth2: You can try a mix of <strong>code</strong>, <strong>id_token</strong>, <strong>token</strong></p>
+                              <p class="controls-info">You can try a mix of <strong>code</strong>, <strong>id_token</strong>, <strong>token</strong></p>
                             </div>
                           </div>
                           <div class="form-group">
                             <label class="col-xs-2 control-label">Response Mode</label>
                             <div class="col-xs-10">
                               <input id="response_mode" type="text" class="form-control" value="">
-                              <p class="controls-info">For OIDC/OAuth2: You can try something like <strong>fragment</strong>, <strong>query</strong> or <strong>form_post</strong></p>
+                              <p class="controls-info">You can try something like <strong>fragment</strong>, <strong>query</strong> or <strong>form_post</strong></p>
                             </div>
                           </div>
                           <div class="form-group"><label class="col-xs-2 control-label">Scope</label>
                             <div class="col-xs-10">
                               <input id="scope" type="text" class="form-control" value="openid name email">
-                              <p class="controls-info">For OIDC/OAuth2: you can try something like <strong>openid name email read:appointments</strong></p>
+                              <p class="controls-info">You can try something like <strong>openid name email read:appointments</strong></p>
                             </div>
                           </div>
                           <div class="form-group"><label class="col-xs-2 control-label">Prompt</label>
                             <div class="col-xs-10">
                               <input id="prompt" type="text" class="form-control" value="openid name email">
-                              <p class="controls-info">For OIDC/OAuth2: you can try something like <strong>consent</strong> or <strong>login</strong></p>
+                              <p class="controls-info">You can try something like <strong>consent</strong> or <strong>login</strong></p>
                             </div>
                           </div>
                         </form>
