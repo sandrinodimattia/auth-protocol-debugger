@@ -17,8 +17,8 @@
     "webtask-bundle": "^2.1.1"
   },
   "scripts": {
-    "deploy": "npm run bundle && wt create --name debugger --profile sandrino-default build/bundle.js",
-    "bundle": "wt-bundle index.js -o ./build/bundle.js"
+    "deploy": "npm run bundle && wt create --name debugger --no-parse --no-merge --profile sandrino-default build/bundle.js",
+    "bundle": "wt-bundle index.js -m -o ./build/bundle.js"
   },
   "author": "Sandrino Di Mattia",
   "license": "MIT"
