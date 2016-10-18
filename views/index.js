@@ -116,7 +116,7 @@ module.exports = `<html lang="en">
                             <label class="col-xs-2 control-label">Client Secret</label>
                             <div class="col-xs-6">
                               <input id="client_secret" type="password" class="form-control" value="">
-                              <p class="controls-info">Don't store any production secrets here.</p>
+                              <p class="controls-info">Optional: Not all clients have a secret (eg: Mobile, SPA, Public). Don't store any production secrets here.</p>
                             </div>
                             <div class="col-xs-4">
                               <div class="ui-switch ui-switch-labeled ui-switch-xl">
@@ -457,7 +457,7 @@ var callbackUrl = window.location.origin + window.location.pathname;
 $(function () {
   read();
 
-  if ("{{method}}" === 'POST' || (window.location.hash && window.location.hash.length > 1) || (window.location.search && window.location.search.length > 1)) {
+  if ("{{method}}" === 'POST' || (window.location.hash && window.location.hash.length > 1) || (window.location.search && window.location.search.length > 1 && window.location.search !== '?webtask_no_cache=1')) {
     $('#tabs a[href="#request"]').tab('show');
   }
 
