@@ -1,5 +1,5 @@
 {
-  "name": "auth-client-debugger",
+  "name": "auth-protocol-debugger",
   "version": "1.0.0",
   "description": "A debugger for SAML/WS-Federation/OIDC/OAuth2 responses",
   "main": "index.js",
