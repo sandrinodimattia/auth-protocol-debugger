@@ -386,9 +386,16 @@ function read() {
   $('#save_client_secret').prop('checked', localStorage.getItem('auth_debugger_client_secret') && localStorage.getItem('auth_debugger_client_secret').length);
   $('#scope').val(localStorage.getItem('auth_debugger_scope') || 'openid name email nickname');
   $('#state').val(localStorage.getItem('auth_debugger_state') || 'my-custom-state');
-  $('#use_audience').prop('checked', !!localStorage.getItem('auth_debugger_use_audience'));
-  $('#use_pkce').prop('checked', !!localStorage.getItem('auth_debugger_use_pkce'));
-  $('#use_sso').prop('checked', !!localStorage.getItem('auth_debugger_use_sso'));
+
+  if (localStorage.getItem('auth_debugger_use_audience') === "1") {
+    $('#use_audience').prop('checked', 'checked');
+  }
+  if (localStorage.getItem('auth_debugger_use_pkce') === "1") {
+    $('#use_pkce').prop('checked', 'checked');
+  }
+  if (localStorage.getItem('auth_debugger_use_sso') === "1") {
+    $('#use_sso').prop('checked', 'checked');
+  }
 }
 
 function save() {
@@ -404,9 +411,9 @@ function save() {
   localStorage.setItem('auth_debugger_response_type', $('#response_type').val());
   localStorage.setItem('auth_debugger_scope', $('#scope').val());
   localStorage.setItem('auth_debugger_state', $('#state').val());
-  localStorage.setItem('auth_debugger_use_audience', $('#use_audience').is(':checked'));
-  localStorage.setItem('auth_debugger_use_pkce', $('#use_pkce').is(':checked'));
-  localStorage.setItem('auth_debugger_use_sso', $('#use_sso').is(':checked'));
+  localStorage.setItem('auth_debugger_use_audience', $('#use_audience').is(':checked') ? "1" : "0");
+  localStorage.setItem('auth_debugger_use_pkce', $('#use_pkce').is(':checked') ? "1" : "0");
+  localStorage.setItem('auth_debugger_use_sso', $('#use_sso').is(':checked') ? "1" : "0");
 }
 
 function tokenRequest(title, opt) {
@@ -425,7 +432,7 @@ function tokenRequest(title, opt) {
       if (data.request.client_secret) {
         data.request.client_secret = '*****************';
       }
-      $.ajax({ type: "POST", url: '{{baseUrl}}/api-call', data: JSON.stringify(data), contentType: 'application/json' })
+      $.ajax({ type: "POST", url: '{{baseUrl}}/request', data: JSON.stringify(data), contentType: 'application/json' })
         .done(function(data) {
           $('#modal-body').html(data);
           $('#modal-body').prepend($('<pre/>', { 'class':'json-object', 'html': 'POST ' + 'https://' + $('#domain').val() + '/oauth/token' }));

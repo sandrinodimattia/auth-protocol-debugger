@@ -7,24 +7,12 @@ const Webtask = require('webtask-tools');
 const expressTools = require('auth0-extension-express-tools');
 
 const utils = require('./lib/utils');
+const index = handlebars.compile(require('./views/index'));
+const partial = handlebars.compile(require('./views/partial'));
 
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
-const hash = handlebars.compile(require('./views/hash'));
-app.get('/hash', function(req, res) {
-  try {
-    res.send(hash({
-      hash: utils.syntaxHighlight(req.query),
-      id_token: utils.jwt(req.query && req.query.id_token),
-      access_token: utils.jwt(req.query && req.query.access_token)
-    }));
-  } catch (e) {
-    console.log(e);
-    res.json(e);
-  }
-});
 
 app.get('/pkce', function(req, res) {
   const verifier = utils.base64url(crypto.randomBytes(32));
@@ -34,24 +22,25 @@ app.get('/pkce', function(req, res) {
   })
 });
 
-const apiCall = handlebars.compile(require('./views/api-call'));
-app.post('/api-call', function(req, res) {
-  try {
-    const request = req.body.request;
-    delete req.body.request;
-    res.send(apiCall({
-      request: utils.syntaxHighlight(request),
-      response: utils.syntaxHighlight(req.body),
-      id_token: utils.jwt(req.body && req.body.id_token),
-      access_token: utils.jwt(req.body && req.body.access_token)
-    }));
-  } catch (e) {
-    console.log(e);
-    res.json(e);
-  }
+app.get('/hash', function(req, res) {
+  res.send(partial({
+    hash: utils.syntaxHighlight(req.query),
+    id_token: utils.jwt(req.query && req.query.id_token),
+    access_token: utils.jwt(req.query && req.query.access_token)
+  }));
 });
 
-const index = handlebars.compile(require('./views/index'));
+app.post('/request', function(req, res) {
+  const request = req.body.request;
+  delete req.body.request;
+  res.send(partial({
+    request: utils.syntaxHighlight(request),
+    response: utils.syntaxHighlight(req.body),
+    id_token: utils.jwt(req.body && req.body.id_token),
+    access_token: utils.jwt(req.body && req.body.access_token)
+  }));
+});
+
 const renderIndex = function(req, res) {
   try {
     const headers = req.headers;
