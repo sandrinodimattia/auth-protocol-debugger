@@ -1,4 +1,5 @@
 const path = require('path');
+const crypto = require('crypto');
 const express = require('express')
 const bodyParser = require('body-parser')
 const handlebars = require('handlebars');
@@ -25,10 +26,21 @@ app.get('/hash', function(req, res) {
   }
 });
 
+app.get('/pkce', function(req, res) {
+  const verifier = utils.base64url(crypto.randomBytes(32));
+  return res.json({
+    verifier: verifier,
+    verifier_challenge: utils.base64url(crypto.createHash('sha256').update(verifier).digest())
+  })
+});
+
 const apiCall = handlebars.compile(require('./views/api-call'));
 app.post('/api-call', function(req, res) {
   try {
+    const request = req.body.request;
+    delete req.body.request;
     res.send(apiCall({
+      request: utils.syntaxHighlight(request),
       response: utils.syntaxHighlight(req.body),
       id_token: utils.jwt(req.body && req.body.id_token),
       access_token: utils.jwt(req.body && req.body.access_token)

@@ -4,9 +4,12 @@ Handy little tool that will show you the incoming body and query string you'll r
 
 Demo: https://sandrino.us.webtask.io/debugger
 
-## Missing Features
+## Supported Features
 
- - Refresh Tokens
- - Client Credentials
- - PKCE
- - Token Exchange for Code Flow
+  - SAML
+  - WS-Federation
+  - OAuth2
+  - OpenID Connect
+  - Refresh Tokens
+  - Client Credentials
+  - PKCE

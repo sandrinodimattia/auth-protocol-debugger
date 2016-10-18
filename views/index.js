@@ -161,6 +161,16 @@ module.exports = `<html lang="en">
                         <p>The following settings only apply to the OAuth2 / OIDC endpoints and might behave differently if you're using OAuth2 as a Service (Preview)</p>
                         <form class="form-horizontal col-xs-12">
                           <div class="form-group">
+                            <label class="col-xs-2 control-label">PKCE</label>
+                            <div class="col-xs-10">
+                              <div class="ui-switch">
+                                <input id="use_pkce" type="checkbox"/>
+                                <label class="status"></label>
+                              </div>
+                              <p class="controls-info">The PKCE or Hybrid Flow is a better alternative to the implicit flow for Mobile Apps.</p>
+                            </div>
+                          </div>
+                          <div class="form-group">
                             <label class="col-xs-2 control-label">Audience</label>
                             <div class="col-xs-7">
                               <input id="audience" type="text" class="form-control" value="">
@@ -178,6 +188,13 @@ module.exports = `<html lang="en">
                             <div class="col-xs-10">
                               <input id="authorization_code" type="text" class="form-control" value="{{authorization_code}}">
                               <p class="controls-info">Set the response type to <strong>code</strong> and then press the <strong>OIDC / OAuth2</strong> button to get an authorization code.</p>
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label class="col-xs-2 control-label">Code Verifier</label>
+                            <div class="col-xs-10">
+                              <input id="code_verifier" type="text" class="form-control" value="{{code_verifier}}">
+                              <p class="controls-info">If you're using <strong>PKCE</strong>, this is what will be used instead of the Client Secret.</p>
                             </div>
                           </div>
                           <div class="form-group">
@@ -214,6 +231,9 @@ module.exports = `<html lang="en">
                             </div>
                           </div>
                         </form>
+                      </div>
+                      <div class="col-xs-12">
+                        <button id="reset_settings" class="btn btn-success">Reset Settings</button>
                       </div>
                     </div>
                   </div>
@@ -352,35 +372,67 @@ module.exports = `<html lang="en">
 <script>hljs.initHighlightingOnLoad();</script>
 <script type="text/javascript">
 function read() {
-  $('#domain').val(localStorage.getItem('domain') || 'sandrino.auth0.com');
-  $('#connection').val(localStorage.getItem('connection'));
-  $('#client_id').val(localStorage.getItem('client_id') || 'IsTxQ7jAYAXL5r5HM4L1RMzsSG0UHeOy');
-  $('#client_secret').val(localStorage.getItem('client_secret'));
-  $('#save_client_secret').prop('checked', localStorage.getItem('client_secret') && localStorage.getItem('client_secret').length);
-  $('#audience').val(localStorage.getItem('audience'));
-  $('#scope').val(localStorage.getItem('scope') || 'openid name email nickname');
-  $('#state').val(localStorage.getItem('state') || 'my-custom-state');
-  $('#prompt').val(localStorage.getItem('prompt') || '');
-  $('#response_type').val(localStorage.getItem('response_type') || 'token');
-  $('#response_mode').val(localStorage.getItem('response_mode') || '');
-  $('#use_audience').prop('checked', !!localStorage.getItem('use_audience'));
-  $('#use_sso').prop('checked', !!localStorage.getItem('use_sso'));
+  $('#domain').val(localStorage.getItem('auth_debugger_domain') || 'sandrino.auth0.com');
+  $('#connection').val(localStorage.getItem('auth_debugger_connection'));
+  $('#client_id').val(localStorage.getItem('auth_debugger_client_id') || 'IsTxQ7jAYAXL5r5HM4L1RMzsSG0UHeOy');
+  $('#client_secret').val(localStorage.getItem('auth_debugger_client_secret'));
+  $('#save_client_secret').prop('checked', localStorage.getItem('auth_debugger_client_secret') && localStorage.getItem('auth_debugger_client_secret').length);
+  $('#audience').val(localStorage.getItem('auth_debugger_audience'));
+  $('#refresh_token').val(localStorage.getItem('auth_debugger_refresh_token'));
+  $('#code_verifier').val(localStorage.getItem('auth_debugger_code_verifier'));
+  $('#scope').val(localStorage.getItem('auth_debugger_scope') || 'openid name email nickname');
+  $('#state').val(localStorage.getItem('auth_debugger_state') || 'my-custom-state');
+  $('#prompt').val(localStorage.getItem('auth_debugger_prompt') || '');
+  $('#response_type').val(localStorage.getItem('auth_debugger_response_type') || 'token');
+  $('#response_mode').val(localStorage.getItem('auth_debugger_response_mode') || '');
+  $('#use_audience').prop('checked', !!localStorage.getItem('auth_debugger_use_audience'));
+  $('#use_sso').prop('checked', !!localStorage.getItem('auth_debugger_use_sso'));
+  $('#use_pkce').prop('checked', !!localStorage.getItem('auth_debugger_use_pkce'));
   $('#callback_url').val(window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '') + window.location.pathname);
 }
 
 function save() {
-  localStorage.setItem('domain', $('#domain').val());
-  localStorage.setItem('connection', $('#connection').val());
-  localStorage.setItem('client_id', $('#client_id').val());
-  localStorage.setItem('client_secret', $('#save_client_secret').is(':checked') ? $('#client_secret').val() : '');
-  localStorage.setItem('audience', $('#audience').val());
-  localStorage.setItem('scope', $('#scope').val());
-  localStorage.setItem('state', $('#state').val());
-  localStorage.setItem('use_sso', $('#use_sso').is(':checked'));
-  localStorage.setItem('prompt', $('#prompt').val());
-  localStorage.setItem('response_type', $('#response_type').val());
-  localStorage.setItem('response_mode', $('#response_mode').val());
-  localStorage.setItem('use_audience', $('#use_audience').is(':checked'));
+  localStorage.setItem('auth_debugger_domain', $('#domain').val());
+  localStorage.setItem('auth_debugger_connection', $('#connection').val());
+  localStorage.setItem('auth_debugger_client_id', $('#client_id').val());
+  localStorage.setItem('auth_debugger_client_secret', $('#save_client_secret').is(':checked') ? $('#client_secret').val() : '');
+  localStorage.setItem('auth_debugger_audience', $('#audience').val());
+  localStorage.setItem('auth_debugger_scope', $('#scope').val());
+  localStorage.setItem('auth_debugger_state', $('#state').val());
+  localStorage.setItem('auth_debugger_refresh_token', $('#refresh_token').val());
+  localStorage.setItem('auth_debugger_use_sso', $('#use_sso').is(':checked'));
+  localStorage.setItem('auth_debugger_use_pkce', $('#use_pkce').is(':checked'));
+  localStorage.setItem('auth_debugger_prompt', $('#prompt').val());
+  localStorage.setItem('auth_debugger_response_type', $('#response_type').val());
+  localStorage.setItem('auth_debugger_response_mode', $('#response_mode').val());
+  localStorage.setItem('auth_debugger_code_verifier', $('#code_verifier').val());
+  localStorage.setItem('auth_debugger_use_audience', $('#use_audience').is(':checked'));
+}
+
+function tokenRequest(opt) {
+  $.post('https://' + $('#domain').val() + '/oauth/token', opt)
+    .done(function(data) {
+      data.request = opt;
+      if (data.refresh_token) {
+        localStorage.setItem('auth_debugger_refresh_token', data.refresh_token);
+      }
+      if (data.request.client_secret) {
+        data.request.client_secret = '*****************';
+      }
+      $.ajax({ type: "POST", url: '{{baseUrl}}/api-call', data: JSON.stringify(data), contentType: 'application/json' })
+        .done(function(data) {
+          $('#modal-body').html(data);
+          $('#modal-body').prepend($('<pre/>', { 'class':'json-object', 'html': 'POST ' + 'https://' + $('#domain').val() + '/oauth/token' }));
+        })
+        .fail(function(err) {
+          $('#modal-body').html('<p>Error decoding the response.</p>');
+          $('<pre/>', { 'class':'json-object', 'html': err.responseText || err.name || err.text || err.body || err.status }).appendTo('#modal-body');
+        });
+    })
+    .fail(function(err) {
+      $('#modal-body').html('');
+      $('<pre/>', { 'class':'json-object', 'html': err.responseText || err.name || err.text || err.body || err.status }).appendTo('#modal-body');
+    });
 }
 
 if (!window.location.origin) {
@@ -426,6 +478,17 @@ $(function () {
     window.location.href = url;
   });
 
+  $('#reset_settings').click(function(e) {
+    e.preventDefault();
+    for (key in localStorage) {
+      if (key.indexOf('auth_debugger_') === 0) {
+        delete localStorage[key];
+      }
+    }
+
+    read();
+  });
+
   $('#oauth2_client_credentials').click(function(e) {
     e.preventDefault();
     save();
@@ -434,28 +497,12 @@ $(function () {
     $('#modal-body').html('Loading...');
     $('#modal-dialog').modal({ show: true });
 
-    var opt = {
+    tokenRequest({
       audience: $('#audience').val(),
       client_id: $('#client_id').val(),
       client_secret: $('#client_secret').val(),
       grant_type: 'client_credentials'
-    };
-
-    $.post('https://' + $('#domain').val() + '/oauth/token', opt)
-      .done(function(data) {
-        $.post('{{baseUrl}}/api-call', data)
-          .done(function(data) {
-            $('#modal-body').html(data);
-          })
-          .fail(function(err) {
-            $('#modal-body').html('<p>Error decoding the response.</p>');
-            $('<pre/>', { 'class':'json-object', 'html': err.responseText || err.name || err.text || err.body || err.status }).appendTo('#modal-body');
-          });
-      })
-      .fail(function(err) {
-        $('#modal-body').html('');
-        $('<pre/>', { 'class':'json-object', 'html': err.responseText || err.name || err.text || err.body || err.status }).appendTo('#modal-body');
-      });
+    });
   });
 
   $('#oauth2_code_exchange').click(function(e) {
@@ -469,31 +516,18 @@ $(function () {
     var opt = {
       audience: $('#audience').val(),
       client_id: $('#client_id').val(),
-      client_secret: $('#client_secret').val(),
       redirect_uri: callbackUrl,
       code: $('#authorization_code').val(),
       grant_type: 'authorization_code'
     };
 
-    $.post('https://' + $('#domain').val() + '/oauth/token', opt)
-      .done(function(data) {
-        $.post('{{baseUrl}}/api-call', data)
-          .done(function(html) {
-            if (data && data.refresh_token) {
-              $('#refresh_token').val(data.refresh_token);
-            }
+    if ($('#use_pkce').is(':checked')) {
+      opt.code_verifier = $('#code_verifier').val();
+    } else {
+      opt.client_secret = $('#client_secret').val();
+    }
 
-            $('#modal-body').html(html);
-          })
-          .fail(function(err) {
-            $('#modal-body').html('<p>Error decoding the response.</p>');
-            $('<pre/>', { 'class':'json-object', 'html': err.responseText || err.name || err.text || err.body || err.status }).appendTo('#modal-body');
-          });
-      })
-      .fail(function(err) {
-        $('#modal-body').html('');
-        $('<pre/>', { 'class':'json-object', 'html': err.responseText || err.name || err.text || err.body || err.status }).appendTo('#modal-body');
-      });
+    tokenRequest(opt);
   });
 
   $('#oauth2_refresh_token_exchange').click(function(e) {
@@ -507,68 +541,69 @@ $(function () {
     var opt = {
       audience: $('#audience').val(),
       client_id: $('#client_id').val(),
-      client_secret: $('#client_secret').val(),
       refresh_token: $('#refresh_token').val(),
       grant_type: 'refresh_token'
     };
 
-    $.post('https://' + $('#domain').val() + '/oauth/token', opt)
-      .done(function(data) {
-        $.post('{{baseUrl}}/api-call', data)
-          .done(function(data) {
-            $('#modal-body').html(data);
-          })
-          .fail(function(err) {
-            $('#modal-body').html('<p>Error decoding the response.</p>');
-            $('<pre/>', { 'class':'json-object', 'html': err.responseText || err.name || err.text || err.body || err.status }).appendTo('#modal-body');
-          });
-      })
-      .fail(function(err) {
-        $('#modal-body').html('');
-        $('<pre/>', { 'class':'json-object', 'html': err.responseText || err.name || err.text || err.body || err.status }).appendTo('#modal-body');
-      });
+    if ($('#use_pkce').is(':checked')) {
+      opt.code_verifier = $('#code_verifier').val();
+    } else {
+      opt.client_secret = $('#client_secret').val();
+    }
+
+    tokenRequest(opt);
   });
 
   $('#oidc_oauth2').click(function(e) {
     e.preventDefault();
     save();
 
-    var auth0 = new Auth0({
-      domain: $('#domain').val(),
-      clientID: $('#client_id').val(),
-      callbackURL: callbackUrl
-    });
+    // Don't do this in production. The client should always generate the verifier, and not rely on a remote server to do this.
+    $.get('{{baseUrl}}/pkce')
+      .done(function(data) {
+        var auth0 = new Auth0({
+          domain: $('#domain').val(),
+          clientID: $('#client_id').val(),
+          callbackURL: callbackUrl
+        });
 
-    var options = {
-      state: $('#state').val(),
-      sso: $('#use_sso').is(':checked')
-    };
+        var options = {
+          state: $('#state').val(),
+          sso: $('#use_sso').is(':checked'),
+        };
 
-    if ($('#scope').val() && $('#scope').val().length) {
-      options.scope = $('#scope').val();
-    }
+        if ($('#use_pkce').is(':checked')) {
+          options.code_challenge = data.verifier_challenge;
+          options.code_challenge_method = 'S256';
+          localStorage.setItem('auth_debugger_code_verifier', data.verifier);
+        }
 
-    if ($('#connection').val() && $('#connection').val().length) {
-      options.connection = $('#connection').val();
-    }
+        if ($('#scope').val() && $('#scope').val().length) {
+          options.scope = $('#scope').val();
+        }
 
-    if ($('#use_audience').is(':checked') && $('#audience').val() && $('#audience').val().length) {
-      options.audience = $('#audience').val();
-    }
+        if ($('#connection').val() && $('#connection').val().length) {
+          options.connection = $('#connection').val();
+        }
 
-    if ($('#response_type').val() && $('#response_type').val().length) {
-      options.response_type = $('#response_type').val();
-    }
+        if ($('#use_audience').is(':checked') && $('#audience').val() && $('#audience').val().length) {
+          options.audience = $('#audience').val();
+        }
 
-    if ($('#response_mode').val() && $('#response_mode').val().length) {
-      options.response_mode = $('#response_mode').val();
-    }
+        if ($('#response_type').val() && $('#response_type').val().length) {
+          options.response_type = $('#response_type').val();
+        }
 
-    if ($('#prompt').val() && $('#prompt').val().length) {
-      options.prompt = $('#prompt').val();
-    }
+        if ($('#response_mode').val() && $('#response_mode').val().length) {
+          options.response_mode = $('#response_mode').val();
+        }
 
-    auth0.login(options);
+        if ($('#prompt').val() && $('#prompt').val().length) {
+          options.prompt = $('#prompt').val();
+        }
+
+        auth0.login(options);
+      });
   });
 });
 </script>
