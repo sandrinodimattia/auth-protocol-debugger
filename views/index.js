@@ -517,12 +517,15 @@ $(function () {
     e.preventDefault();
 
     var opt = {
-      audience: $('#audience').val(),
       client_id: $('#client_id').val(),
       redirect_uri: callbackUrl,
       code: $('#authorization_code').val(),
       grant_type: 'authorization_code'
     };
+
+    if ($('#use_audience').is(':checked') && $('#audience').val() && $('#audience').val().length) {
+      opt.audience = $('#audience').val();
+    }
 
     if ($('#use_pkce').is(':checked')) {
       opt.code_verifier = $('#code_verifier').val();
@@ -537,11 +540,14 @@ $(function () {
     e.preventDefault();
 
     var opt = {
-      audience: $('#audience').val(),
       client_id: $('#client_id').val(),
       refresh_token: $('#refresh_token').val(),
       grant_type: 'refresh_token'
     };
+
+    if ($('#use_audience').is(':checked') && $('#audience').val() && $('#audience').val().length) {
+      opt.audience = $('#audience').val();
+    }
 
     if ($('#use_pkce').is(':checked')) {
       opt.code_verifier = $('#code_verifier').val();
