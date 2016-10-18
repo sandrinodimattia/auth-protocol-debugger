@@ -167,7 +167,7 @@ module.exports = `<html lang="en">
                                 <input id="use_pkce" type="checkbox"/>
                                 <label class="status"></label>
                               </div>
-                              <p class="controls-info">The PKCE or Hybrid Flow is a better alternative to the implicit flow for Mobile Apps.</p>
+                              <p class="controls-info">The PKCE (Proof Key for Code Exchange by OAuth Public Clients) or Hybrid Flow is a better alternative to the implicit flow for Mobile Apps.</p>
                             </div>
                           </div>
                           <div class="form-group">
