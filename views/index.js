@@ -296,6 +296,12 @@ module.exports = `<html lang="en">
                           <div id="other-flows" class="tab-pane">
                             <button id="saml" class="btn btn-primary">SAML</button>
                             <button id="wsfed" class="btn btn-primary">WS-Federation</button>
+                            <h5>Logout</h5>
+                            <button id="logout" class="btn btn-primary">Logout</button>
+                            <button id="logout-federated" class="btn btn-primary">Logout (Federated)</button>
+                            <h5>SSO</h5>
+                            <button id="sso-data" class="btn btn-primary">Get SSO Data</button>
+                            <div id="sso-data-output"></div>
                           </div>
                         </div>
                       </div>
@@ -582,6 +588,18 @@ $(function () {
     window.location.href = url;
   });
 
+  $('#logout').click(function(e) {
+    e.preventDefault();
+    save();
+    window.location.href = 'https://' + $('#domain').val() + '/v2/logout?client_id=' + $('#client_id').val() + '&returnTo=' + encodeURIComponent(callbackUrl);
+  });
+
+  $('#logout-federated').click(function(e) {
+    e.preventDefault();
+    save();
+    window.location.href = 'https://' + $('#domain').val() + '/v2/logout?federated&client_id=' + $('#client_id').val() + '&returnTo=' + encodeURIComponent(callbackUrl);
+  });
+
   $('#reset_settings').click(function(e) {
     e.preventDefault();
     for (key in localStorage) {
@@ -788,6 +806,30 @@ $(function () {
 
         auth0.login(options);
       });
+  });
+
+  $('#sso-data').click(function(e) {
+    e.preventDefault();
+    save();
+
+    var auth0 = new Auth0({
+      domain: $('#domain').val(),
+      clientID: $('#client_id').val(),
+      callbackURL: callbackUrl
+    });
+
+    $('#sso-data-output').html('Loading...');
+
+    auth0.getSSOData(function(err, res) {
+      $.ajax({ type: "POST", url: '{{baseUrl}}/request', data: JSON.stringify({ error: err, response: res }), contentType: 'application/json' })
+        .done(function(data) {
+          $('#sso-data-output').html(data);
+        })
+        .fail(function(err) {
+          $('#sso-data-output').html('');
+          $('<pre/>', { 'class':'json-object', 'html': err.responseText || err.name || err.text || err.body || err.status }).appendTo('#sso-data-output');
+        });
+    });
   });
 });
 </script>
