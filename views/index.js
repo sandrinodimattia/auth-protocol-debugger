@@ -372,44 +372,50 @@ module.exports = `<html lang="en">
 <script>hljs.initHighlightingOnLoad();</script>
 <script type="text/javascript">
 function read() {
-  $('#domain').val(localStorage.getItem('auth_debugger_domain') || 'sandrino.auth0.com');
-  $('#connection').val(localStorage.getItem('auth_debugger_connection'));
+  $('#audience').val(localStorage.getItem('auth_debugger_audience'));
+  $('#callback_url').val(window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '') + window.location.pathname);
   $('#client_id').val(localStorage.getItem('auth_debugger_client_id') || 'IsTxQ7jAYAXL5r5HM4L1RMzsSG0UHeOy');
   $('#client_secret').val(localStorage.getItem('auth_debugger_client_secret'));
-  $('#save_client_secret').prop('checked', localStorage.getItem('auth_debugger_client_secret') && localStorage.getItem('auth_debugger_client_secret').length);
-  $('#audience').val(localStorage.getItem('auth_debugger_audience'));
-  $('#refresh_token').val(localStorage.getItem('auth_debugger_refresh_token'));
   $('#code_verifier').val(localStorage.getItem('auth_debugger_code_verifier'));
+  $('#connection').val(localStorage.getItem('auth_debugger_connection'));
+  $('#domain').val(localStorage.getItem('auth_debugger_domain') || 'sandrino.auth0.com');
+  $('#prompt').val(localStorage.getItem('auth_debugger_prompt') || '');
+  $('#refresh_token').val(localStorage.getItem('auth_debugger_refresh_token'));
+  $('#response_mode').val(localStorage.getItem('auth_debugger_response_mode') || '');
+  $('#response_type').val(localStorage.getItem('auth_debugger_response_type') || 'token');
+  $('#save_client_secret').prop('checked', localStorage.getItem('auth_debugger_client_secret') && localStorage.getItem('auth_debugger_client_secret').length);
   $('#scope').val(localStorage.getItem('auth_debugger_scope') || 'openid name email nickname');
   $('#state').val(localStorage.getItem('auth_debugger_state') || 'my-custom-state');
-  $('#prompt').val(localStorage.getItem('auth_debugger_prompt') || '');
-  $('#response_type').val(localStorage.getItem('auth_debugger_response_type') || 'token');
-  $('#response_mode').val(localStorage.getItem('auth_debugger_response_mode') || '');
   $('#use_audience').prop('checked', !!localStorage.getItem('auth_debugger_use_audience'));
-  $('#use_sso').prop('checked', !!localStorage.getItem('auth_debugger_use_sso'));
   $('#use_pkce').prop('checked', !!localStorage.getItem('auth_debugger_use_pkce'));
-  $('#callback_url').val(window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '') + window.location.pathname);
+  $('#use_sso').prop('checked', !!localStorage.getItem('auth_debugger_use_sso'));
 }
 
 function save() {
-  localStorage.setItem('auth_debugger_domain', $('#domain').val());
-  localStorage.setItem('auth_debugger_connection', $('#connection').val());
+  localStorage.setItem('auth_debugger_audience', $('#audience').val());
   localStorage.setItem('auth_debugger_client_id', $('#client_id').val());
   localStorage.setItem('auth_debugger_client_secret', $('#save_client_secret').is(':checked') ? $('#client_secret').val() : '');
-  localStorage.setItem('auth_debugger_audience', $('#audience').val());
+  localStorage.setItem('auth_debugger_code_verifier', $('#code_verifier').val());
+  localStorage.setItem('auth_debugger_connection', $('#connection').val());
+  localStorage.setItem('auth_debugger_domain', $('#domain').val());
+  localStorage.setItem('auth_debugger_prompt', $('#prompt').val());
+  localStorage.setItem('auth_debugger_refresh_token', $('#refresh_token').val());
+  localStorage.setItem('auth_debugger_response_mode', $('#response_mode').val());
+  localStorage.setItem('auth_debugger_response_type', $('#response_type').val());
   localStorage.setItem('auth_debugger_scope', $('#scope').val());
   localStorage.setItem('auth_debugger_state', $('#state').val());
-  localStorage.setItem('auth_debugger_refresh_token', $('#refresh_token').val());
-  localStorage.setItem('auth_debugger_use_sso', $('#use_sso').is(':checked'));
-  localStorage.setItem('auth_debugger_use_pkce', $('#use_pkce').is(':checked'));
-  localStorage.setItem('auth_debugger_prompt', $('#prompt').val());
-  localStorage.setItem('auth_debugger_response_type', $('#response_type').val());
-  localStorage.setItem('auth_debugger_response_mode', $('#response_mode').val());
-  localStorage.setItem('auth_debugger_code_verifier', $('#code_verifier').val());
   localStorage.setItem('auth_debugger_use_audience', $('#use_audience').is(':checked'));
+  localStorage.setItem('auth_debugger_use_pkce', $('#use_pkce').is(':checked'));
+  localStorage.setItem('auth_debugger_use_sso', $('#use_sso').is(':checked'));
 }
 
-function tokenRequest(opt) {
+function tokenRequest(title, opt) {
+  save();
+
+  $('#modal-title').html(title);
+  $('#modal-body').html('Loading...');
+  $('#modal-dialog').modal({ show: true });
+
   $.post('https://' + $('#domain').val() + '/oauth/token', opt)
     .done(function(data) {
       data.request = opt;
@@ -491,13 +497,8 @@ $(function () {
 
   $('#oauth2_client_credentials').click(function(e) {
     e.preventDefault();
-    save();
 
-    $('#modal-title').html('OAuth2 - Client Credentials');
-    $('#modal-body').html('Loading...');
-    $('#modal-dialog').modal({ show: true });
-
-    tokenRequest({
+    tokenRequest('OAuth2 - Client Credentials', {
       audience: $('#audience').val(),
       client_id: $('#client_id').val(),
       client_secret: $('#client_secret').val(),
@@ -507,11 +508,6 @@ $(function () {
 
   $('#oauth2_code_exchange').click(function(e) {
     e.preventDefault();
-    save();
-
-    $('#modal-title').html('OAuth2 - Authorization Code Exchange');
-    $('#modal-body').html('Loading...');
-    $('#modal-dialog').modal({ show: true });
 
     var opt = {
       audience: $('#audience').val(),
@@ -527,16 +523,11 @@ $(function () {
       opt.client_secret = $('#client_secret').val();
     }
 
-    tokenRequest(opt);
+    tokenRequest('OAuth2 - Authorization Code Exchange', opt);
   });
 
   $('#oauth2_refresh_token_exchange').click(function(e) {
     e.preventDefault();
-    save();
-
-    $('#modal-title').html('OAuth2 - Refresh Token Exchange');
-    $('#modal-body').html('Loading...');
-    $('#modal-dialog').modal({ show: true });
 
     var opt = {
       audience: $('#audience').val(),
@@ -551,7 +542,7 @@ $(function () {
       opt.client_secret = $('#client_secret').val();
     }
 
-    tokenRequest(opt);
+    tokenRequest('OAuth2 - Refresh Token Exchange', opt);
   });
 
   $('#oidc_oauth2').click(function(e) {
