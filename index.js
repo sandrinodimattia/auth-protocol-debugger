@@ -1,3 +1,4 @@
+const url = require('url');
 const path = require('path');
 const crypto = require('crypto');
 const express = require('express')
@@ -63,6 +64,23 @@ const renderIndex = function(req, res) {
     res.json(e);
   }
 };
+
+app.get('/.well-known/oauth2-client-configuration', function (req, res) {
+  var protocol = 'https';
+  var pathname = url.parse(req.originalUrl).pathname.replace(req.path, '');
+  var baseUrl = url.format({
+    protocol: protocol,
+    host:     req.get('host'),
+    pathname: pathname
+  });
+
+  res.header("Content-Type", 'application/json');
+  res.status(200).send({
+    redirect_uris: [baseUrl],
+    client_name:   'Protocol Debugger',
+    post_logout_redirect_uris: [baseUrl]
+  });
+});
 
 app.get('*', renderIndex);
 app.post('*', renderIndex);
